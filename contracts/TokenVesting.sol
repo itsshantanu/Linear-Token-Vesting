@@ -113,4 +113,33 @@ contract TokenVesting is Ownable,ReentrancyGuard {
         perMentorTokens = ((totalTokens * MentorsTGE * totalMentors) /  denominator);
     }
 
+    // It will track the claim status of the tokens.
+
+    function tokenClaimStatus() public returns(uint256) {
+        Beneficiary memory beneficiaryMem = beneficiaries[msg.sender];
+        uint8 roleCheck = beneficiaryMem.role;
+        uint256 claimTokens = beneficiaryMem.totalTokensClaimed;
+
+        if (roleCheck == 0) {
+            tokensAvailable = getAvailableTokens(perAdvisorTokens);
+        } else if (roleCheck == 1) {
+            tokensAvailable = getAvailableTokens(perPartnerTokens);
+        } else {
+            tokensAvailable = getAvailableTokens(perMentorTokens);
+        }
+        return tokensAvailable - claimTokens;
+    }
+
+    // It will calculate and return available token
+
+    function getAvailableTokens(uint256 perRoleTokens) internal returns (uint256)
+    {
+        uint256 Time = block.timestamp - startTime - cliff;
+        if (Time >= duration) {
+            return tokensAvailable = perRoleTokens;
+        } else {
+            return tokensAvailable = (perRoleTokens * Time) / duration;
+        }
+    }
+
 }
