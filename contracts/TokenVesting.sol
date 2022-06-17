@@ -84,6 +84,18 @@ contract TokenVesting is Ownable,ReentrancyGuard {
         }
     }
 
+    // It will set Dynamic TGE for different Roles
+
+    function setTGE(uint8 _role, uint256 _percent) external onlyOwner {
+        if (_role == 0) {
+            AdvisorsTGE = _percent;
+        } else if (_role == 1) {
+            PartnersTGE = _percent;
+        } else {
+            MentorsTGE = _percent;
+        }
+    }
+
     event VestingStarted(
         uint256 cliff, 
         uint256 duration
