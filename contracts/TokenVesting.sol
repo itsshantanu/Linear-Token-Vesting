@@ -11,12 +11,12 @@ contract TokenVesting is Ownable,ReentrancyGuard {
 
     // 3 Roles - Advisors, Partners, Mentors
     uint256 public perAdvisorTokens;
-    uint256 public perPartnerTokens;
+    uint256 public perPartnershipTokens;
     uint256 public perMentorTokens;
 
     // TGE for 3 roles
     uint256 public AdvisorsTGE = 5;
-    uint256 public PartnersTGE = 10;
+    uint256 public PartnershipsTGE = 10;
     uint256 public MentorsTGE = 9;
     uint256 public denominator = 100;
 
@@ -30,7 +30,7 @@ contract TokenVesting is Ownable,ReentrancyGuard {
 
     // Total in each role
     uint256 public totalAdvisors;
-    uint256 public totalPartners;
+    uint256 public totalPartnerships;
     uint256 public totalMentors;
 
     uint startTime;
@@ -73,15 +73,18 @@ contract TokenVesting is Ownable,ReentrancyGuard {
         beneficiaries[_beneficiary].role = _role;
         beneficiaries[_beneficiary].isBeneficiary = true;
 
-        emit AddBeneficiary(_beneficiary, _role);
-
         if (_role == 0) {
             totalAdvisors++;
         } else if (_role == 1) {
-            totalPartners++;
+            totalPartnerships++;
         } else {
             totalMentors++;
         }
+
+        emit AddBeneficiary(
+            _beneficiary,
+             _role
+        );
     }
 
     // It will set Dynamic TGE for different Roles
@@ -90,7 +93,7 @@ contract TokenVesting is Ownable,ReentrancyGuard {
         if (_role == 0) {
             AdvisorsTGE = _percent;
         } else if (_role == 1) {
-            PartnersTGE = _percent;
+            PartnershipsTGE = _percent;
         } else {
             MentorsTGE = _percent;
         }
@@ -114,14 +117,17 @@ contract TokenVesting is Ownable,ReentrancyGuard {
 
         tokenCalculatePerRole();
 
-        emit VestingStarted(cliff, duration);
+        emit VestingStarted(
+            cliff, 
+            duration
+        );
     }
 
     // It will calculate tokens for every Role.
 
     function tokenCalculatePerRole() private {
         perAdvisorTokens = ((totalTokens * AdvisorsTGE * totalAdvisors) / denominator);
-        perPartnerTokens = ((totalTokens * PartnersTGE * totalPartners) / denominator);
+        perPartnershipTokens = ((totalTokens * PartnershipsTGE * totalPartnerships) / denominator);
         perMentorTokens = ((totalTokens * MentorsTGE * totalMentors) /  denominator);
     }
 
@@ -137,7 +143,7 @@ contract TokenVesting is Ownable,ReentrancyGuard {
         if (roleCheck == 0) {
             tokensAvailable = getAvailableTokens(perAdvisorTokens);
         } else if (roleCheck == 1) {
-            tokensAvailable = getAvailableTokens(perPartnerTokens);
+            tokensAvailable = getAvailableTokens(perPartnershipTokens);
         } else {
             tokensAvailable = getAvailableTokens(perMentorTokens);
         }
@@ -155,6 +161,11 @@ contract TokenVesting is Ownable,ReentrancyGuard {
             return tokensAvailable = (perRoleTokens * Time) / duration;
         }
     }
+
+    event TokensClaimed(
+        address beneficiary, 
+        uint256 tokens
+    );
 
     // It will check all the claimtoken and condition. It will also check whether you claim token last month or not. 
 
@@ -174,7 +185,7 @@ contract TokenVesting is Ownable,ReentrancyGuard {
         if (roleCheck == 0) {
             require(claimedToken < perAdvisorTokens, "you have claimed all Tokens");
         } else if (roleCheck == 1) {
-            require(claimedToken < perPartnerTokens, "you have claimed all Tokens");
+            require(claimedToken < perPartnershipTokens, "you have claimed all Tokens");
         } else {
             require(claimedToken < perMentorTokens, "you have claimed all Tokens");
         }
@@ -183,6 +194,11 @@ contract TokenVesting is Ownable,ReentrancyGuard {
         token.transfer(msg.sender, tokens);
         beneficiaries[msg.sender].lastTimeClaimed = block.timestamp;
         beneficiaries[msg.sender].totalTokensClaimed += tokens;
+
+        emit TokensClaimed(
+            msg.sender, 
+            tokens
+        );
     }
 
     function revokeVesting(address _beneficiary) external onlyOwner {
