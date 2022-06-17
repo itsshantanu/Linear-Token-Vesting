@@ -33,7 +33,55 @@ contract TokenVesting is Ownable,ReentrancyGuard {
     uint256 public totalPartners;
     uint256 public totalMentors;
 
-    // start date & end date
     uint startTime;
     uint256 tokensAvailable;
+
+    enum Roles {
+        advisor,
+        partner,
+        mentor
+    }
+
+    Roles private role;
+
+    struct Beneficiary {
+        uint8 role;
+        uint256 totalTokensClaimed;
+        uint256 lastTimeClaimed;
+        bool isBeneficiary;
+        bool isVestingRevoked;
+    }
+
+    mapping(address => Beneficiary) public beneficiaries;
+
+    constructor(address _tokenAddress) {
+        token = IERC20(_tokenAddress);
+    }
+
+    event AddBeneficiary(
+        address beneficiary,
+        uint8 role
+    );
+
+    // It will add new Beneficiary. Only Owner can do this.
+
+    function addBeneficiary(address _beneficiary, uint8 _role) external onlyOwner{
+        require(_beneficiary != address(0), "0 Address entered. Enter a valid address");
+        require(beneficiaries[_beneficiary].isBeneficiary == false,"Beneficiary already present");
+        require(vestingStarted == false, "Vesting already started");
+
+        beneficiaries[_beneficiary].role = _role;
+        beneficiaries[_beneficiary].isBeneficiary = true;
+
+        emit AddBeneficiary(_beneficiary, _role);
+
+        if (_role == 0) {
+            totalAdvisors++;
+        } else if (_role == 1) {
+            totalPartners++;
+        } else {
+            totalMentors++;
+        }
+    }
+
 }
