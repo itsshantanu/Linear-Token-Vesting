@@ -185,4 +185,10 @@ contract TokenVesting is Ownable,ReentrancyGuard {
         beneficiaries[msg.sender].totalTokensClaimed += tokens;
     }
 
+    function revokeVesting(address _beneficiary) external onlyOwner {
+        require(!beneficiaries[_beneficiary].vestingRevoked, "vesting already Revoked");
+
+        beneficiaries[_beneficiary].vestingRevoked = true;
+    }
+
 }
