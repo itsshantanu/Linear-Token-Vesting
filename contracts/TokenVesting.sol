@@ -49,7 +49,7 @@ contract TokenVesting is Ownable,ReentrancyGuard {
         uint256 totalTokensClaimed;
         uint256 lastTimeClaimed;
         bool isBeneficiary;
-        bool isVestingRevoked;
+        bool vestingRevoked;
     }
 
     mapping(address => Beneficiary) public beneficiaries;
@@ -104,7 +104,7 @@ contract TokenVesting is Ownable,ReentrancyGuard {
     // It will start the vesting by entering cliff period and duration
 
     function startVesting(uint256 _cliff, uint256 _duration) external onlyOwner {
-        require(vestingStarted == false, 'vesting already started');
+        require(vestingStarted == false, "vesting already started");
         require(_cliff > 0 && _duration > 0, "Cliff and Duration should be greater than 0");
         totalTokens = token.balanceOf(address(this));
         cliff = _cliff;
@@ -128,7 +128,9 @@ contract TokenVesting is Ownable,ReentrancyGuard {
     // It will track the claim status of the tokens.
 
     function tokenClaimStatus() public returns(uint256) {
+
         Beneficiary memory beneficiaryMem = beneficiaries[msg.sender];
+
         uint8 roleCheck = beneficiaryMem.role;
         uint256 claimTokens = beneficiaryMem.totalTokensClaimed;
 
@@ -152,6 +154,35 @@ contract TokenVesting is Ownable,ReentrancyGuard {
         } else {
             return tokensAvailable = (perRoleTokens * Time) / duration;
         }
+    }
+
+    // It will check all the claimtoken and condition. It will also check whether you claim token last month or not. 
+
+    function claimToken() external nonReentrant {
+        
+        Beneficiary memory beneficiaryMem = beneficiaries[msg.sender];
+
+        require(vestingStarted == true, "vesting not strated");
+        require(beneficiaryMem.isBeneficiary == true, "You are not beneficiary");
+        require(beneficiaryMem.vestingRevoked == false, "vesting has been Revoked");
+        require(block.timestamp >= cliff + startTime, "vesting is in cliff period");
+        require(block.timestamp - beneficiaryMem.lastTimeClaimed > 2592000, "Token already claimed within last month");
+        uint8 roleCheck = beneficiaryMem.role;
+        uint256 claimedToken = beneficiaryMem.totalTokensClaimed;
+        
+
+        if (roleCheck == 0) {
+            require(claimedToken < perAdvisorTokens, "you have claimed all Tokens");
+        } else if (roleCheck == 1) {
+            require(claimedToken < perPartnerTokens, "you have claimed all Tokens");
+        } else {
+            require(claimedToken < perMentorTokens, "you have claimed all Tokens");
+        }
+        uint256 tokens = tokenClaimStatus();
+
+        token.transfer(msg.sender, tokens);
+        beneficiaries[msg.sender].lastTimeClaimed = block.timestamp;
+        beneficiaries[msg.sender].totalTokensClaimed += tokens;
     }
 
 }
