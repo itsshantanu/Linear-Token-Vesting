@@ -15,8 +15,8 @@ contract TokenVesting is Ownable,ReentrancyGuard {
     uint256 public perMentorTokens;
 
     // TGE for 3 roles
-    uint256 public AdvisorTGE = 5;
-    uint256 public PartnershipsTGE = 10;
+    uint256 public AdvisorsTGE = 5;
+    uint256 public PartnersTGE = 10;
     uint256 public MentorsTGE = 9;
     uint256 public denominator = 100;
 
@@ -82,6 +82,35 @@ contract TokenVesting is Ownable,ReentrancyGuard {
         } else {
             totalMentors++;
         }
+    }
+
+    event VestingStarted(
+        uint256 cliff, 
+        uint256 duration
+    );
+
+    // It will start the vesting by entering cliff period and duration
+
+    function startVesting(uint256 _cliff, uint256 _duration) external onlyOwner {
+        require(vestingStarted == false, 'vesting already started');
+        require(_cliff > 0 && _duration > 0, "Cliff and Duration should be greater than 0");
+        totalTokens = token.balanceOf(address(this));
+        cliff = _cliff;
+        duration = _duration;
+        vestingStarted = true;
+        startTime = block.timestamp;
+
+        tokenCalculatePerRole();
+
+        emit VestingStarted(cliff, duration);
+    }
+
+    // It will calculate tokens for every Role.
+
+    function tokenCalculatePerRole() private {
+        perAdvisorTokens = ((totalTokens * AdvisorsTGE * totalAdvisors) / denominator);
+        perPartnerTokens = ((totalTokens * PartnersTGE * totalPartners) / denominator);
+        perMentorTokens = ((totalTokens * MentorsTGE * totalMentors) /  denominator);
     }
 
 }
