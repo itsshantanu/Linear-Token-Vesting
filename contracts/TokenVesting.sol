@@ -22,7 +22,6 @@ contract TokenVesting is Ownable,ReentrancyGuard {
 
     IERC20 private token;  
     uint256 private totalTokens;
-    uint256 private start;
     uint256 private cliff;
     uint256 private duration;
     address private beneficiary;
@@ -177,7 +176,7 @@ contract TokenVesting is Ownable,ReentrancyGuard {
         require(beneficiaryMem.isBeneficiary == true, "You are not beneficiary");
         require(beneficiaryMem.vestingRevoked == false, "vesting has been Revoked");
         require(block.timestamp >= cliff + startTime, "vesting is in cliff period");
-        require(block.timestamp - beneficiaryMem.lastTimeClaimed > 2592000, "Token already claimed within last month");
+        require(block.timestamp - beneficiaryMem.lastTimeClaimed > 86400, "Token already claimed within last one day");
         uint8 roleCheck = beneficiaryMem.role;
         uint256 claimedToken = beneficiaryMem.totalTokensClaimed;
         
