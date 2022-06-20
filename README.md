@@ -72,6 +72,6 @@ Help
 npx hardhat help
 ```
 
-## Check at Rinkeby Test Net:
+## Check at Ropsten Test Net:
  - [MoonToken](https://ropsten.etherscan.io/address/0x9a26a8715792fD7670210d4ADbc52e7d504F8515)
  - [TokenVesiting](https://ropsten.etherscan.io/address/0xea07912E1d7334b8A7e13528D925227a1A207499)
