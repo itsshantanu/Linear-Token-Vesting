@@ -10,15 +10,14 @@ contract TokenVesting is Ownable,ReentrancyGuard {
     // Vesting 
 
     // 3 Roles - Advisors, Partners, Mentors
-    uint256 public perAdvisorTokens;
-    uint256 public perPartnershipTokens;
-    uint256 public perMentorTokens;
+    uint256 private perAdvisorTokens;
+    uint256 private perPartnershipTokens;
+    uint256 private perMentorTokens;
 
     // TGE for 3 roles
     uint256 public AdvisorsTGE = 5;
     uint256 public PartnershipsTGE = 10;
     uint256 public MentorsTGE = 9;
-    uint256 public denominator = 100;
 
     IERC20 private token;  
     uint256 private totalTokens;
@@ -28,9 +27,10 @@ contract TokenVesting is Ownable,ReentrancyGuard {
     bool public vestingStarted;
 
     // Total in each role
-    uint256 public totalAdvisors;
-    uint256 public totalPartnerships;
-    uint256 public totalMentors;
+    uint256 private totalAdvisors;
+    uint256 private totalPartnerships;
+    uint256 private totalMentors;
+    uint256 private denominator = 100;
 
     uint startTime;
     uint256 tokensAvailable;

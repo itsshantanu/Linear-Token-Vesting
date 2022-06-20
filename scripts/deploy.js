@@ -1,4 +1,5 @@
 const hre = require('hardhat');
+const { BigNumber } = require('ethers');
 
 async function main() {
   const MoonToken = await hre.ethers.getContractFactory('MoonToken');

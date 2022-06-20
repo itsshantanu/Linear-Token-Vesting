@@ -70,7 +70,7 @@ describe('Vesting Contract', function () {
 		});
 
 		it('Should claim tokens after cliff period ', async () => {
-			await vesting.startVesting(5, 15);
+			await vesting.startVesting(30, 60);
 
 			await hre.network.provider.send('hardhat_mine', ['0x3e8', '0x3c']);
 			const balanceBefore = await moonToken
