@@ -38,7 +38,7 @@ To run this project, you will need to add the following environment variables to
 
 Clone the github repo:
 ```
-https://github.com/itsshantanu/NFTMarketPlace
+https://github.com/itsshantanu/Linear-Token-Vesting
 ```
 
 Install Node Modules
